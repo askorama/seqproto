@@ -1,0 +1,53 @@
+{
+  "name": "serdes",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "This lib",
+  "main": "./dist/cjs/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.cjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm && npm run rename:cjs",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "rename:cjs": "mv ./dist/cjs/index.js ./dist/cjs/index.cjs",
+    "lint": "ts-standard",
+    "benchmark:ser": "node --import tsx tests/ser.benchmark.ts",
+    "benchmark:des": "node --import tsx tests/des.benchmark.ts",
+    "benchmark:serdes": "node --import tsx tests/serdes.benchmark.ts",
+    "test": "node --import tsx tests/*.test.ts"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Tommaso Allevi",
+    "email": "tomallevi@gmail.com",
+    "url": "https://github.com/allevo",
+    "author": true
+  },
+  "engines": {
+    "node": ">= 20.0.0"
+  },
+  "devDependencies": {
+    "@msgpack/msgpack": "3.0.0-beta2",
+    "@types/node": "=20.8.0",
+    "avro-js": "^1.11.3",
+    "avsc": "^5.7.7",
+    "benny": "^3.7.1",
+    "cbor": "^9.0.1",
+    "cbor-x": "^1.5.4",
+    "fast-json-stringify": "^5.9.1",
+    "lodash": "^4.17.21",
+    "msgpackr": "^1.9.9",
+    "protobufjs": "^7.2.5",
+    "ts-standard": "^12.0.2",
+    "tsx": "^3.14.0",
+    "typescript": "^5.2.2",
+    "undici-types": "^5.27.2"
+  }
+}
