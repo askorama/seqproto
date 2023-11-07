@@ -1,8 +1,8 @@
 {
-  "name": "serdes",
+  "name": "seqproto",
   "version": "0.0.1",
   "type": "module",
-  "description": "This lib",
+  "description": "More than fast serialization / deserialization utility for your structured data",
   "main": "./dist/cjs/index.js",
   "types": "./dist/cjs/index.d.ts",
   "exports": {
