@@ -12,7 +12,6 @@ import * as msgpackr from 'msgpackr'
 import protobuf from 'protobufjs'
 import avro from 'avsc'
 
-
 interface Todo {
   userId: number
   id: number
@@ -23,7 +22,7 @@ interface Todo {
 const todos: Todo[] = JSON.parse(fs.readFileSync('./tests/data/todos.json', 'utf8'))
 
 const root = await protobuf.load('./tests/data/todos.proto')
-const prtobufType = root.lookupType('todos.TodosMessage')
+const protobufType = root.lookupType('todos.TodosMessage')
 
 const type = avro.Type.forSchema({
   name: 'Todos',
@@ -44,7 +43,7 @@ const ser = createSer()
 await b.suite(
   'Serialize / Deserialize',
 
-  b.add('serdes', () => {
+  b.add('seqproto', () => {
     ser.index = 0
     ser.serializeArray(todos, (ser, todo) => {
       ser.serializeUInt32(todo.id)
@@ -63,17 +62,14 @@ await b.suite(
     })
   }),
 
-  /*
   b.add('protobuf', () => {
-    prtobufType.decode(prtobufType.encode({ objects: todos }).finish())
+    protobufType.decode(protobufType.encode({ objects: todos }).finish())
   }),
-  */
 
   b.add('avro', () => {
     type.fromBuffer(type.toBuffer(todos))
   }),
 
-  /*
   b.add('cbor', () => {
     cbor.decode(cbor.encode(todos))
   }),
@@ -93,7 +89,6 @@ await b.suite(
   b.add('JSON', () => {
     JSON.parse(JSON.stringify(todos))
   }),
-  */
 
   b.cycle(),
   b.complete(),

@@ -65,7 +65,7 @@ const jsonStr = JSON.stringify(todos)
 await b.suite(
   'Deserialize',
 
-  b.add('serdes', () => {
+  b.add('seqproto', () => {
     des.setBuffer(bbb)
     des.deserializeArray(des => {
       const id = des.deserializeUInt32()
@@ -79,7 +79,7 @@ await b.suite(
   b.add('avro', () => {
     type.fromBuffer(avroBuff)
   }),
-  /*
+
   b.add('protobuf', () => {
     prtobufType.decode(protobufBuff)
   }),
@@ -103,7 +103,6 @@ await b.suite(
   b.add('JSON', () => {
     JSON.parse(jsonStr)
   }),
-  */
 
   b.cycle(),
   b.complete(),

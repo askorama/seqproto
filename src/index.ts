@@ -41,19 +41,19 @@ export function createSer (): Ser {
 }
 
 export function createDes (buffer: ArrayBuffer): Des {
-  const n = buffer.byteLength - (buffer.byteLength % 4)
+  const n32 = Math.floor(buffer.byteLength / 4)
 
   return {
     index: 0,
     buffer,
-    uint32Array: new Uint32Array(buffer.slice(0, n)),
-    float32Array: new Float32Array(buffer.slice(0, n)),
+    uint32Array: new Uint32Array(buffer, 0, n32),
+    float32Array: new Float32Array(buffer, 0, n32),
     setBuffer: function (buffer: ArrayBuffer) {
-      const n = buffer.byteLength - (buffer.byteLength % 4)
+      const n32 = Math.floor(buffer.byteLength / 4)
       this.buffer = buffer
       this.index = 0
-      this.uint32Array = new Uint32Array(buffer.slice(0, n))
-      this.float32Array = new Float32Array(buffer.slice(0, n))
+      this.uint32Array = new Uint32Array(buffer, 0, n32)
+      this.float32Array = new Float32Array(buffer, 0, n32)
     },
     deserializeBoolean,
     deserializeUInt32,
@@ -105,7 +105,6 @@ function serializeArray<T> (this: Ser, arr: T[], serialize: (ser: Ser, t: T) => 
     serialize(this, arr[i])
   }
 }
-
 function deserializeArray<T> (this: Des, deserialize: (ser: Des) => T): T[] {
   const len = this.deserializeUInt32()
   const arr = new Array(len)

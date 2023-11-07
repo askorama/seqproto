@@ -57,7 +57,7 @@ const ser = createSer()
 await b.suite(
   'Serialize',
 
-  b.add('serdes', () => {
+  b.add('seqproto', () => {
     ser.index = 0
     ser.serializeArray(todos, (ser, todo) => {
       ser.serializeUInt32(todo.id)
