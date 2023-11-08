@@ -10,7 +10,7 @@ Install with:
 
 ### Examples
 
-For more examples, see the [examples](./examples) directory.
+For more examples, see the [examples](https://github.com/oramasearch/seqproto/tree/main/examples) directory.
 
 ```typescript
 import { createSer, createDes } from 'seqproto'
