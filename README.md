@@ -1,5 +1,8 @@
 # SeqProto
 
+[![Nodejs](https://github.com/oramasearch/seqproto/actions/workflows/nodejs.yml/badge.svg)](https://github.com/oramasearch/seqproto/actions/workflows/nodejs.yml)
+![npm package minimized gzipped size (select exports)](https://img.shields.io/bundlejs/size/seqproto)
+
 This library provides a simple way to serialize and deserialize objects in binary format.
 
 Install with:
