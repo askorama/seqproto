@@ -6,7 +6,7 @@ import {
 
 import { encode as msgpackEncode } from '@msgpack/msgpack'
 import cbor from 'cbor'
-import * as cborx from 'cbor-x';
+import * as cborx from 'cbor-x'
 import * as msgpackr from 'msgpackr'
 import protobuf from 'protobufjs'
 import avro from 'avsc'

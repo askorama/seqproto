@@ -6,7 +6,7 @@ import {
 
 import { encode as msgpackEncode, decode as msgpackDecode } from '@msgpack/msgpack'
 import cbor from 'cbor'
-import * as cborx from 'cbor-x';
+import * as cborx from 'cbor-x'
 import * as msgpackr from 'msgpackr'
 import protobuf from 'protobufjs'
 import avro from 'avsc'
@@ -22,7 +22,7 @@ interface Todo {
 
 const todos: Todo[] = [
   { userId: 1, id: 1, title: 'delectus aut autem', completed: false },
-  { userId: 1, id: 2, title: 'quis ut nam facilis et officia qui', completed: true },
+  { userId: 1, id: 2, title: 'quis ut nam facilis et officia qui', completed: true }
 ]
 
 const root = await protobuf.load('./tests/data/todos.proto')

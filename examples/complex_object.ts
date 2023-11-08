@@ -19,27 +19,27 @@ interface Post {
   comments: Comment[]
 }
 
-function serializeUser(ser: Ser, user: User) {
+function serializeUser (ser: Ser, user: User): void {
   ser.serializeUInt32(user.id)
   ser.serializeString(user.username)
 }
-function deserializeUser(des: Des): User {
+function deserializeUser (des: Des): User {
   const id = des.deserializeUInt32()
   const username = des.deserializeString()
   return { id, username }
 }
-function serializeComment(ser: Ser, comment: Comment) {
+function serializeComment (ser: Ser, comment: Comment): void {
   ser.serializeUInt32(comment.id)
   ser.serializeString(comment.body)
   serializeUser(ser, comment.user)
 }
-function deserializeComment(des: Des): Comment {
+function deserializeComment (des: Des): Comment {
   const id = des.deserializeUInt32()
   const body = des.deserializeString()
   const user = deserializeUser(des)
   return { id, body, user }
 }
-function serializePost (ser: Ser, post: Post) {
+function serializePost (ser: Ser, post: Post): void {
   ser.serializeUInt32(post.id)
   ser.serializeString(post.title)
   serializeUser(ser, post.creator)
@@ -60,7 +60,7 @@ serializePost(ser, {
   creator: { id: 1, username: 'bob' },
   comments: [
     { id: 1, body: 'hello', user: { id: 1, username: 'bob' } },
-    { id: 2, body: 'world', user: { id: 2, username: 'alice' } },
+    { id: 2, body: 'world', user: { id: 2, username: 'alice' } }
   ]
 })
 const buffer = ser.getBuffer()

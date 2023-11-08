@@ -8,7 +8,7 @@ interface Todo {
   completed: boolean
 }
 
-function serializeTodo (ser: Ser, todo: Todo) {
+function serializeTodo (ser: Ser, todo: Todo): void {
   ser.serializeUInt32(todo.id)
   ser.serializeUInt32(todo.userId)
   ser.serializeString(todo.title)
@@ -27,7 +27,7 @@ serializeTodo(ser, {
   id: 1,
   userId: 1,
   title: 'hello',
-  completed: false,
+  completed: false
 })
 const buffer = ser.getBuffer()
 

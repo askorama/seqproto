@@ -190,6 +190,5 @@ tmp
 
 bun.lockb
 benchmark
-pnpm-lock.yaml
 
 *.0x/

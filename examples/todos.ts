@@ -3,11 +3,10 @@ import type { Ser, Des } from '../src/index'
 
 let buffer
 
-
 { // Serialize
   const todos = [
-    { userId: 1, id: 1, completed: false, title: "delectus aut autem" },
-    { userId: 1, id: 2, completed: true, title: "quis ut nam facilis et officia qui" },
+    { userId: 1, id: 1, completed: false, title: 'delectus aut autem' },
+    { userId: 1, id: 2, completed: true, title: 'quis ut nam facilis et officia qui' }
   ]
   const ser: Ser = createSer()
   ser.serializeArray(todos, (ser, todo) => {
