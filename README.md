@@ -60,7 +60,7 @@ const f = des.deserializeFloat32()
 const s = des.deserializeString()
 const a = des.deserializeArray((des) => des.deserializeUInt32())
 
-console.log({b, i, f, s, a})
+console.log({ b, i, f, s, a })
 ```
 
 ### Object
