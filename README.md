@@ -168,4 +168,4 @@ Contributions are welcome! Please open an issue if you have any ideas for improv
 
 ## License
 
-Apache-2.0
+Developed by [OramaSearch Inc](https://oramasearch.com), licensed under the [Apache-2.0](/LICENSE.md) license.
