@@ -5,9 +5,28 @@
 
 This library provides a simple way to serialize and deserialize objects in binary format.
 
-Install with:
+## Why another serialization library?
 
-```npm install seqproto```
+While I have been writing this library, I have in mind the following main goals:
+- **Runtime independent** - I want to have a library that runs in every javascript runtime, from Node.JS, through browsers, to CloudFlare.
+- **Performance** - I want to have a library that is fast and easy to use.
+- **Small size** - I want to have a library that is small and easy to use.
+- **Customizable** - Due to the JavaScript nature, the data structures are limited.
+- **TypeScript support** - I want to have a library that is easy to use in TypeScript.
+
+## Installation
+
+Seqproto works in any JavaScript environment. You can install it via npm:
+
+```sh
+npm install seqproto
+```
+
+Or via CDN:
+
+```js
+import { createSer, createDes } from https://unpkg.com/seqproto@latest/dist/esm/index.js
+```
 
 ## Usage
 
@@ -27,6 +46,7 @@ ser.serializeUInt32(42)
 ser.serializeFloat32(-0.5)
 ser.serializeString('hello world')
 ser.serializeArray([1, 2, 3], (ser, n) => ser.serializeUInt32(n))
+
 // Get ArrayBuffer with serialized data
 const buffer = ser.getBuffer()
 
@@ -46,8 +66,8 @@ console.log({b, i, f, s, a})
 ### Object
 
 ```typescript
-import { createSer, createDes } from 'seqproto'
 import type { Ser, Des } from 'seqproto'
+import { createSer, createDes } from 'seqproto'
 
 interface Todo {
   id: number
@@ -88,37 +108,40 @@ console.log(JSON.stringify(todo, null, 2))
 ### Array of object
 
 ```typescript
-import { createSer, createDes } from 'seqproto'
 import type { Ser, Des } from 'seqproto'
+import { createSer, createDes } from 'seqproto'
 
 let buffer
 
-{ // Serialize
-  const todos = [
-    { userId: 1, id: 1, completed: false, title: "delectus aut autem" },
-    { userId: 1, id: 2, completed: true, title: "quis ut nam facilis et officia qui" },
-  ]
-  const ser: Ser = createSer();
-  ser.serializeArray(todos, (ser, todo) => {
-    ser.serializeUInt32(todo.id)
-    ser.serializeUInt32(todo.userId)
-    ser.serializeString(todo.title)
-    ser.serializeBoolean(todo.completed)
-  })
-  buffer = ser.getBuffer()
-}
+// Serialize
+const todos = [
+  { userId: 1, id: 1, completed: false, title: "delectus aut autem" },
+  { userId: 1, id: 2, completed: true, title: "quis ut nam facilis et officia qui" }
+]
 
-{ // Deserialize
-  const des: Des = createDes(buffer);
-  const todos = des.deserializeArray((des) => {
-    const id = des.deserializeUInt32()
-    const userId = des.deserializeUInt32()
-    const title = des.deserializeString()
-    const completed = des.deserializeBoolean()
-    return { id, userId, title, completed }
-  })
-  console.log(todos)
-}
+const ser: Ser = createSer()
+
+ser.serializeArray(todos, (ser, todo) => {
+  ser.serializeUInt32(todo.id)
+  ser.serializeUInt32(todo.userId)
+  ser.serializeString(todo.title)
+  ser.serializeBoolean(todo.completed)
+})
+
+buffer = ser.getBuffer()
+
+// Deserialize
+const des: Des = createDes(buffer)
+
+const todos = des.deserializeArray((des) => {
+  const id = des.deserializeUInt32()
+  const userId = des.deserializeUInt32()
+  const title = des.deserializeString()
+  const completed = des.deserializeBoolean()
+  return { id, userId, title, completed }
+})
+
+console.log(todos)
 ```
 
 ## API
@@ -138,15 +161,6 @@ This library exports the following functions:
 - `ser.serializeFloat32(float32)`: serializes float 32bit.
 - `des.deserializeFloat32()`: deserializes float 32bit.
 - `ser.getBuffer()`: returns the serialized buffer.
-
-## Why another serialization library?
-
-While I have been writing this library, I have in mind the following main goals:
-- **Runtime independent** - I want to have a library that runs in every javascript runtime, from Node.JS, through browsers, to CloudFlare.
-- **Performance** - I want to have a library that is fast and easy to use.
-- **Small size** - I want to have a library that is small and easy to use.
-- **Customizable** - Due to the JavaScript nature, the data structures are limited.
-- **TypeScript support** - I want to have a library that is easy to use in TypeScript.
 
 ## Contributing
 
