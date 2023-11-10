@@ -82,6 +82,7 @@ function serializeTodo (ser: Ser, todo: Todo) {
   ser.serializeString(todo.title)
   ser.serializeBoolean(todo.completed)
 }
+
 function deserializeTodo (des: Des): Todo {
   const id = des.deserializeUInt32()
   const userId = des.deserializeUInt32()
@@ -91,12 +92,14 @@ function deserializeTodo (des: Des): Todo {
 }
 
 const ser: Ser = createSer()
+
 serializeTodo(ser, {
   id: 1,
   userId: 1,
   title: 'hello',
   completed: false,
 })
+
 const buffer = ser.getBuffer()
 
 const des: Des = createDes(buffer)
