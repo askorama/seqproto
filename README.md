@@ -25,7 +25,7 @@ npm install seqproto
 Or via CDN:
 
 ```js
-import { createSer, createDes } from https://unpkg.com/seqproto@latest/dist/esm/index.js
+import { createSer, createDes } from 'https://unpkg.com/seqproto@latest/dist/esm/index.js'
 ```
 
 ## Usage
@@ -60,7 +60,7 @@ const f = des.deserializeFloat32()
 const s = des.deserializeString()
 const a = des.deserializeArray((des) => des.deserializeUInt32())
 
-console.log({b, i, f, s, a})
+console.log({ b, i, f, s, a })
 ```
 
 ### Object
