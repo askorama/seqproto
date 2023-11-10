@@ -133,7 +133,7 @@ buffer = ser.getBuffer()
 // Deserialize
 const des: Des = createDes(buffer)
 
-const todos = des.deserializeArray((des) => {
+const deserializedTodos = des.deserializeArray((des) => {
   const id = des.deserializeUInt32()
   const userId = des.deserializeUInt32()
   const title = des.deserializeString()
@@ -141,7 +141,7 @@ const todos = des.deserializeArray((des) => {
   return { id, userId, title, completed }
 })
 
-console.log(todos)
+console.log(deserializedTodos)
 ```
 
 ## API
