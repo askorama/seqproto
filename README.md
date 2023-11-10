@@ -25,7 +25,7 @@ npm install seqproto
 Or via CDN:
 
 ```js
-import { createSer, createDes } from https://unpkg.com/seqproto@latest/dist/esm/index.js
+import { createSer, createDes } from 'https://unpkg.com/seqproto@latest/dist/esm/index.js'
 ```
 
 ## Usage
