@@ -10,7 +10,7 @@ export interface Ser {
   serializeFloat32: (n: number) => void
   serializeString: (str: string) => void
   serializeArray: <T>(arr: T[], serialize: (ser: Ser, t: T) => void) => void
-  serializeIterable <T>(iterable: Iterable<T>, serialize: (ser: Ser, t: T) => void): void
+  serializeIterable: <T>(iterable: Iterable<T>, serialize: (ser: Ser, t: T) => void) => void
 }
 export interface Des {
   index: number
@@ -23,7 +23,7 @@ export interface Des {
   deserializeFloat32: () => number
   deserializeString: () => string
   deserializeArray: <T>(deserialize: (des: Des) => T) => T[]
-  deserializeIterable <T>(deserialize: (des: Des) => T): Iterable<T>
+  deserializeIterable: <T>(deserialize: (des: Des) => T) => Iterable<T>
 }
 
 export function createSer (): Ser {
@@ -63,7 +63,7 @@ export function createDes (buffer: ArrayBuffer): Des {
     deserializeFloat32,
     deserializeString,
     deserializeArray,
-    deserializeIterable,
+    deserializeIterable
   }
 }
 
@@ -131,16 +131,15 @@ function serializeIterable<T> (this: Ser, iterable: Iterable<T>, serialize: (ser
 
 function deserializeIterable<T> (this: Des, deserialize: (des: Des) => T): Iterable<T> {
   const len = this.deserializeUInt32()
-  const des = this
-  const aGeneratorObject = (function* () {
+  const aGeneratorObject = (function * (des) {
     for (let i = 0; i < len; i++) {
       yield deserialize(des)
     }
-  })();
+  })(this)
 
   return {
-    [Symbol.iterator]() {
-      return aGeneratorObject;
-    },
+    [Symbol.iterator] () {
+      return aGeneratorObject
+    }
   }
 }
