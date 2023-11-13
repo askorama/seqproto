@@ -1,14 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "CommonJS",
+    "target": "es2017",
+    "module": "NodeNext",
     "declaration": true,
     "outDir": "./dist",
+    "moduleResolution": "nodenext",
     "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ES2023", "dom"]
   },
-  "include": ["src/**/*", "examples/**/*", "tests/**/*"],
+  "include": ["src/**/*", "examples/**/*", "tests/**/*", "tests"],
   "exclude": ["node_modules"]
 }

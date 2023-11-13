@@ -160,7 +160,9 @@ This library exports the following functions:
 - `ser.serializeString(string)`: serializes a string.
 - `des.deserializeString()`: deserializes a string.
 - `ser.serializeArray(array, (ser, item) => { ... })`: serializes an array.
-- `des.deserializeArray(array, (des) => { ... })`: deserializes an array.
+- `des.deserializeArray((des) => { ... })`: deserializes an array.
+- `ser.serializeIterable(iterable, (ser, item) => { ... })`: serializes an iterable.
+- `des.deserializeIterable((des) => { ... })`: deserializes an iterable.
 - `ser.serializeFloat32(float32)`: serializes float 32bit.
 - `des.deserializeFloat32()`: deserializes float 32bit.
 - `ser.getBuffer()`: returns the serialized buffer.

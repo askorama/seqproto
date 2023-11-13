@@ -214,6 +214,53 @@ await t.test('array', async t => {
   })
 })
 
+await t.test('iterable', async t => {
+  await t.test('map<number, number>', async t => {
+    const expected: Map<number, number> = new Map([[0, 1], [2, 3], [4, 5]])
+
+    const ser = createSer()
+    ser.serializeIterable(expected.entries(), (ser, n) => {
+      ser.serializeUInt32(n[0])
+      ser.serializeUInt32(n[1])
+    })
+
+    const des = createDes(ser.getBuffer())
+    const m = new Map(des.deserializeIterable(() => [des.deserializeUInt32(), des.deserializeUInt32()]))
+    assert.deepStrictEqual(m, expected)
+  })
+
+  await t.test('map<string, number>', async t => {
+    const expected: Map<string, number> = new Map([
+      ['foo', 1],
+      ['bar', 3],
+      ['baz', 5]
+    ])
+
+    const ser = createSer()
+    ser.serializeIterable(expected.entries(), (ser, n) => {
+      ser.serializeString(n[0])
+      ser.serializeUInt32(n[1])
+    })
+
+    const des = createDes(ser.getBuffer())
+    const m = new Map(des.deserializeIterable(() => [des.deserializeString(), des.deserializeUInt32()]))
+    assert.deepStrictEqual(m, expected)
+  })
+
+  await t.test('set<number>', async t => {
+    const expected: Set<number> = new Set([1, 3, 5])
+
+    const ser = createSer()
+    ser.serializeIterable(expected.values(), (ser, n) => {
+      ser.serializeUInt32(n)
+    })
+
+    const des = createDes(ser.getBuffer())
+    const m = new Set(des.deserializeIterable(() => des.deserializeUInt32()))
+    assert.deepStrictEqual(m, expected)
+  })
+})
+
 await t.test('random items', async t => {
   const elements: any[] = [
     { item: 'foo', serializer: 'serializeString', deserializer: 'deserializeString' },

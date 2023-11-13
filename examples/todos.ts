@@ -1,5 +1,5 @@
 import { createSer, createDes } from '../src/index.js'
-import type { Ser, Des } from '../src/index'
+import type { Ser, Des } from '../src/index.js'
 
 let buffer
 

@@ -10,6 +10,7 @@ export interface Ser {
   serializeFloat32: (n: number) => void
   serializeString: (str: string) => void
   serializeArray: <T>(arr: T[], serialize: (ser: Ser, t: T) => void) => void
+  serializeIterable <T>(iterable: Iterable<T>, serialize: (ser: Ser, t: T) => void): void
 }
 export interface Des {
   index: number
@@ -22,6 +23,7 @@ export interface Des {
   deserializeFloat32: () => number
   deserializeString: () => string
   deserializeArray: <T>(deserialize: (des: Des) => T) => T[]
+  deserializeIterable <T>(deserialize: (des: Des) => T): Iterable<T>
 }
 
 export function createSer (): Ser {
@@ -36,6 +38,7 @@ export function createSer (): Ser {
     serializeFloat32,
     serializeString,
     serializeArray,
+    serializeIterable,
     getBuffer: function () { return this.buffer.slice(0, this.index * 4) }
   }
 }
@@ -59,7 +62,8 @@ export function createDes (buffer: ArrayBuffer): Des {
     deserializeUInt32,
     deserializeFloat32,
     deserializeString,
-    deserializeArray
+    deserializeArray,
+    deserializeIterable,
   }
 }
 
@@ -112,4 +116,31 @@ function deserializeArray<T> (this: Des, deserialize: (ser: Des) => T): T[] {
     arr[i] = deserialize(this)
   }
   return arr
+}
+
+function serializeIterable<T> (this: Ser, iterable: Iterable<T>, serialize: (ser: Ser, t: T) => void): void {
+  // Keep space for the length
+  const currentIndex = this.index++
+  let n = 0
+  for (const t of iterable) {
+    n++
+    serialize(this, t)
+  }
+  this.uint32Array[currentIndex] = n
+}
+
+function deserializeIterable<T> (this: Des, deserialize: (des: Des) => T): Iterable<T> {
+  const len = this.deserializeUInt32()
+  const des = this
+  const aGeneratorObject = (function* () {
+    for (let i = 0; i < len; i++) {
+      yield deserialize(des)
+    }
+  })();
+
+  return {
+    [Symbol.iterator]() {
+      return aGeneratorObject;
+    },
+  }
 }
