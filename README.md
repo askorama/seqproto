@@ -151,7 +151,7 @@ console.log(deserializedTodos)
 
 This library exports the following functions:
 
-- `createSer()`: creates a new serializer.
+- `createSer()`/`createSer({ bufferSize: number })`: creates a new serializer.
 - `createDes(buffer)`: creates a new deserializer.
 - `ser.serializeBoolean(b)`: serializes a boolean value.
 - `des.deserializeBoolean()`: deserializes a boolean value.

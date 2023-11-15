@@ -261,6 +261,28 @@ await t.test('iterable', async t => {
   })
 })
 
+await t.test('with option', async t => {
+  await t.test('bufferSize', async t => {
+    {
+      const ser = createSer({ bufferSize: 4 })
+      assert.equal(ser.buffer.byteLength, 4)
+    }
+    {
+      const ser = createSer({ bufferSize: 8 })
+      assert.equal(ser.buffer.byteLength, 8)
+    }
+    {
+      const ser = createSer({ bufferSize: 2 ** 32 - 4 })
+      assert.equal(ser.buffer.byteLength, 2 ** 32 - 4)
+    }
+    {
+      assert.throws(() => createSer({ bufferSize: 2 ** 32 }), err => {
+        return /bufferSize option must be strictly less than 2 \*\* 32/.test((err as Error).message)
+      })
+    }
+  })
+})
+
 await t.test('random items', async t => {
   const elements: any[] = [
     { item: 'foo', serializer: 'serializeString', deserializer: 'deserializeString' },

@@ -26,8 +26,16 @@ export interface Des {
   deserializeIterable: <T>(deserialize: (des: Des) => T) => Iterable<T>
 }
 
-export function createSer (): Ser {
-  const buffer = new ArrayBuffer(2 ** 24)
+interface CreateSerOption {
+  bufferSize?: number
+}
+export function createSer ({ bufferSize }: CreateSerOption = {}): Ser {
+  const size = bufferSize || 2 ** 24
+  if (size >= 2 ** 32) {
+    throw new Error('bufferSize option must be strictly less than 2 ** 32')
+  }
+
+  const buffer = new ArrayBuffer(size)
   return {
     index: 0,
     buffer,
