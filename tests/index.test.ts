@@ -275,11 +275,9 @@ await t.test('with option', async t => {
       const ser = createSer({ bufferSize: 2 ** 32 - 4 })
       assert.equal(ser.buffer.byteLength, 2 ** 32 - 4)
     }
-    {
-      assert.throws(() => createSer({ bufferSize: 2 ** 32 }), err => {
-        return /bufferSize option must be strictly less than 2 \*\* 32/.test((err as Error).message)
-      })
-    }
+    assert.throws(() => createSer({ bufferSize: 2 ** 32 }), err => {
+      return (err as Error).message.includes('bufferSize option must be strictly less than 2 ** 32')
+    })
   })
 })
 
