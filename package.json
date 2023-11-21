@@ -57,5 +57,10 @@
     "tsx": "^3.14.0",
     "typescript": "^5.2.2",
     "undici-types": "^5.27.2"
+  },
+  "ts-standard": {
+    "ignore": [
+      "benchmarks/e2e"
+    ]
   }
 }

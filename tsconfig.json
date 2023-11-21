@@ -17,5 +17,8 @@
     "tests/**/*",
     "benchmarks/isolated/*"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "benchmarks/e2e"
+  ]
 }
