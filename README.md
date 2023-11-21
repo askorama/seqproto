@@ -167,6 +167,78 @@ This library exports the following functions:
 - `des.deserializeFloat32()`: deserializes float 32bit.
 - `ser.getBuffer()`: returns the serialized buffer.
 
+## Benchmarks
+
+We created 3 different benchmarks to compare the performance of SeqProto with JSON and Avro.
+
+### Isolated benchmark
+
+You can run the benchmarks with the following command:
+```sh
+npm run benchmark:serdes
+```
+
+Serialization / Deserialization:
+| name | ops | margin | percentSlower |
+| -------- | ------- | -------- | ------- |
+| seqproto | 29764 | 0.72 | 0 |
+| protobuf | 13698 | 0.19 | 53.98 |
+| avro | 24204 | 0.14 | 18.68 |
+| cbor | 803 | 0.22 | 97.3 |
+| cborx | 9707 | 0.32 | 67.39 |
+| msgpack | 6857 | 0.06 | 76.96 |
+| msgpackr | 10449 | 0.27 | 64.89 |
+| JSON | 14434 | 0.07 | 51.51 |
+
+### Http benchmark
+
+You can run the benchmarks using 2 shells.
+
+1.
+```sh
+cd bechmarks/e2e
+pnpm install
+pnpm start
+```
+2.
+```sh
+cd bechmarks/e2e
+pnpm run autocannon:json
+pnpm run autocannon:seqproto
+pnpm run autocannon:avro
+```
+
+| type     | req (in 10s) | Avg req/sec | Avg Bytes/Sec | Avg Latency (ms) |
+| -------- | ---- | --------- | ---- | ---- |
+| JSON     | 164k | 14892 | 275 | 0.11 |
+| SeqProto | 269k | 26865.6 | 321 | 0.01 |
+| Avro     | 197k | 17926.55 | 169 | 0.04 |
+
+### e2e benchmark
+
+You can run the benchmarks with the following command:
+```sh
+cd bechmarks/e2e
+pnpm install
+pnpm start
+```
+And go to http://localhost:3000/public/index.html.
+
+| iteration    | parallelism | type | ms |
+| -------- | ------- | -------- | ------- |
+| 10 | 1 | JSON | 30.69999998807907 |
+| 10 | 1 | SeqProto | 25.600000023841858 |
+| 10 | 1 | Avro | 30.399999976158142 |
+| 100 | 1 | JSON | 108.80000001192093 |
+| 100 | 1 | SeqProto | 96.80000001192093 |
+| 100 | 1 | Avro | 96 |
+| 100 | 3 | JSON | 162.10000002384186 |
+| 100 | 3 | SeqProto | 152.4000000357628 |
+| 100 | 3 | Avro | 167.5 |
+| 100 | 6 | JSON | 277.19999998807907 |
+| 100 | 6 | SeqProto | 263.30000001192093 |
+| 100 | 6 | Avro | 308.19999998807907 |
+
 ## Contributing
 
 Contributions are welcome! Please open an issue if you have any ideas for improvement or found a bug.

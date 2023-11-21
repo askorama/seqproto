@@ -2,7 +2,7 @@ import b from 'benny'
 import fs from 'node:fs'
 import {
   createSer
-} from '../src/index.js'
+} from '../../src/index.js'
 
 import { encode as msgpackEncode } from '@msgpack/msgpack'
 import cbor from 'cbor'
@@ -33,9 +33,9 @@ interface Todo {
   completed: boolean
 }
 
-const todos: Todo[] = JSON.parse(fs.readFileSync('./tests/data/todos.json', 'utf8'))
+const todos: Todo[] = JSON.parse(fs.readFileSync('./benchmarks/isolated/data/todos.json', 'utf8'))
 
-const root = await protobuf.load('./tests/data/todos.proto')
+const root = await protobuf.load('./benchmarks/isolated/data/todos.proto')
 const prtobufType = root.lookupType('todos.TodosMessage')
 
 const type = avro.Type.forSchema({
@@ -103,5 +103,5 @@ await b.suite(
   b.cycle(),
   b.complete(),
   b.save({ file: 'serialize', version: '1.0.0' }),
-  b.save({ file: 'serialize', format: 'chart.html' })
+  b.save({ file: 'serialize', format: 'table.html' })
 )
