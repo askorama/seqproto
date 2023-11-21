@@ -19,9 +19,9 @@
     "build:esm": "tsc -p tsconfig.esm.json",
     "rename:cjs": "mv ./dist/cjs/index.js ./dist/cjs/index.cjs",
     "lint": "ts-standard",
-    "benchmark:ser": "node --import tsx tests/ser.benchmark.ts",
-    "benchmark:des": "node --import tsx tests/des.benchmark.ts",
-    "benchmark:serdes": "node --import tsx tests/serdes.benchmark.ts",
+    "benchmark:ser": "node --import tsx benchmarks/isolated/ser.benchmark.ts",
+    "benchmark:des": "node --import tsx benchmarks/isolated/des.benchmark.ts",
+    "benchmark:serdes": "node --import tsx benchmarks/isolated/serdes.benchmark.ts",
     "test": "node --import tsx tests/*.test.ts"
   },
   "keywords": [
@@ -57,5 +57,10 @@
     "tsx": "^3.14.0",
     "typescript": "^5.2.2",
     "undici-types": "^5.27.2"
+  },
+  "ts-standard": {
+    "ignore": [
+      "benchmarks/e2e"
+    ]
   }
 }

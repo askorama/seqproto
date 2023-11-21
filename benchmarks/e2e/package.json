@@ -1,0 +1,45 @@
+{
+  "name": "seqproto-benchmarks-e2e",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "",
+  "scripts": {
+    "start": "node --import tsx src/index.ts",
+    "autocannon:json": "npx autocannon 'http://localhost:3000/todos'",
+    "autocannon:seqproto": "npx autocannon -H 'accept=application/seqproto' 'http://localhost:3000/todos'",
+    "autocannon:avro": "autocannon -H 'accept=application/avro' 'http://localhost:3000/todos'"
+  },
+  "author": {
+    "name": "Tommaso Allevi",
+    "email": "tomallevi@gmail.com",
+    "url": "https://github.com/allevo",
+    "author": true
+  },
+  "engines": {
+    "node": ">= 20.0.0"
+  },
+  "devDependencies": {
+    "@msgpack/msgpack": "3.0.0-beta2",
+    "@types/node": "=20.8.0",
+    "autocannon": "^7.12.0",
+    "avro-js": "^1.11.3",
+    "avsc": "^5.7.7",
+    "benny": "^3.7.1",
+    "browserify": "^17.0.0",
+    "cbor": "^9.0.1",
+    "cbor-x": "^1.5.4",
+    "fast-json-stringify": "^5.9.1",
+    "lodash": "^4.17.21",
+    "msgpackr": "^1.9.9",
+    "protobufjs": "^7.2.5",
+    "ts-standard": "^12.0.2",
+    "tsx": "^3.14.0",
+    "typescript": "^5.2.2",
+    "undici-types": "^5.27.2"
+  },
+  "dependencies": {
+    "@fastify/static": "^6.12.0",
+    "fastify": "^4.24.3",
+    "seqproto": "link:../.."
+  }
+}

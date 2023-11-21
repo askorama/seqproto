@@ -1,0 +1,150 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+        <script src="./avsc.js"></script>
+        <script src="/seqproto.js" type="module"></script>
+        <style>
+            tbody:empty::after {
+                background-color: #165f11;
+                content: 'No results yet';
+                display: block;
+                padding: 1em;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>SeqProto e2e benchmarks</h1>
+
+        <section>
+            <h2>Configure & Run</h2>
+            <label for="iter-count">Iteration count</label>
+            <input type="number" id="iter-count" value="10">
+            <label for="parallel-invocation">Parallel invocation</label>
+            <input type="number" id="parallel-invocation" value="1">
+            <p><b>NB: the maximum parallel requests in Chrome is 6</b></p>
+            
+            <button id="run-json">JSON</button>
+            <button id="run-seqproto">SeqProto</button>
+            <button id="run-avro">Avro</button>
+
+            <p id="status"></p>
+        </section>
+
+        <section>
+            <h2>Results</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>iteration</th>
+                        <th>parallelism</th>
+                        <th>type</th>
+                        <th>ms</th>
+                    </tr>
+                </thead>
+                <tbody id="result-table-body"></tbody>
+            </table>
+        </section>
+    </body>
+
+    <script type="module">
+        import { createDes } from '/seqproto.js';
+
+        const des = createDes(new ArrayBuffer(0));
+
+        async function seqproto() {
+            const response = await fetch('/todos', {
+                headers: {
+                    'accept': 'application/seqproto',
+                },
+            });
+            const arrBuffer = await response.arrayBuffer();
+            des.setBuffer(arrBuffer);
+            const arr = des.deserializeArray(des => {
+                const id = des.deserializeUInt32()
+                const userId = des.deserializeUInt32()
+                const title = des.deserializeString()
+                const completed = des.deserializeBoolean()
+                return { id, userId, title, completed }
+            })
+
+            return arr
+        }
+
+        const type = avsc.Type.forSchema({
+            name: 'Todos',
+            type: 'array',
+            items: {
+                name: 'Todo',
+                type: 'record',
+                fields: [
+                { name: 'userId', type: 'int' },
+                { name: 'id', type: 'int' },
+                { name: 'title', type: 'string' },
+                { name: 'completed', type: 'boolean' }
+                ]
+            }
+        })
+        async function avro() {
+            const response = await fetch('/todos', {
+                headers: {
+                    'accept': 'application/avro',
+                },
+            });
+            const arrBuffer = await response.arrayBuffer()
+            return type.fromBuffer(new Uint8Array(arrBuffer))
+        }
+
+        async function json() {
+            const response = await fetch('/todos', {
+                headers: {
+                    'accept': 'application/json',
+                },
+            });
+            return response.json();
+        }
+
+        async function bench(iterCount, parallelism, fn) {
+            const start = performance.now();
+            const promises = [];
+            for (let i = 0; i < parallelism; i++) {
+                promises.push((async () => {
+                    for (let j = 0; j < iterCount; j++) {
+                        await fn();
+                    }
+                })());
+            }
+            await Promise.all(promises)
+            const end = performance.now()
+            return end - start
+        }
+
+        const iterCountInput = document.querySelector('#iter-count')
+        const parallelInvocationInput = document.querySelector('#parallel-invocation')
+        const status = document.querySelector('#status')
+        const resultTableBody = document.querySelector('#result-table-body')
+        document.querySelector('#run-json').addEventListener('click', async () => {
+            const iterCount = parseInt(iterCountInput.value, 10)
+            const parallelism = parseInt(parallelInvocationInput.value, 10)
+            status.textContent = 'Running...'
+            const time = await bench(iterCount, parallelism, json)
+            status.textContent = 'Done'
+            resultTableBody.innerHTML += `<tr><td>${iterCount}</td><td>${parallelism}</td><td>JSON</td><td>${time}</td></tr>`
+        })
+        document.querySelector('#run-seqproto').addEventListener('click', async () => {
+            const iterCount = parseInt(iterCountInput.value, 10)
+            const parallelism = parseInt(parallelInvocationInput.value, 10)
+            status.textContent = 'Running...'
+            const time = await bench(iterCount, parallelism, seqproto)
+            status.textContent = 'Done'
+            resultTableBody.innerHTML += `<tr><td>${iterCount}</td><td>${parallelism}</td><td>SeqProto</td><td>${time}</td></tr>`
+        })
+        document.querySelector('#run-avro').addEventListener('click', async () => {
+            const iterCount = parseInt(iterCountInput.value, 10)
+            const parallelism = parseInt(parallelInvocationInput.value, 10)
+            status.textContent = 'Running...'
+            const time = await bench(iterCount, parallelism, avro)
+            status.textContent = 'Done'
+            resultTableBody.innerHTML += `<tr><td>${iterCount}</td><td>${parallelism}</td><td>Avro</td><td>${time}</td></tr>`
+        })
+    </script>
+</html>

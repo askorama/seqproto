@@ -2,7 +2,8 @@ import b from 'benny'
 import {
   createDes,
   createSer
-} from '../src/index.js'
+} from '../../src/index.js'
+import fs from 'node:fs'
 
 import { encode as msgpackEncode, decode as msgpackDecode } from '@msgpack/msgpack'
 import cbor from 'cbor'
@@ -18,14 +19,9 @@ interface Todo {
   completed: boolean
 }
 
-// const todos: Todo[] = JSON.parse(fs.readFileSync('./tests/data/todos.json', 'utf8'))
+const todos: Todo[] = JSON.parse(fs.readFileSync('./benchmarks/isolated/data/todos.json', 'utf8'))
 
-const todos: Todo[] = [
-  { userId: 1, id: 1, title: 'delectus aut autem', completed: false },
-  { userId: 1, id: 2, title: 'quis ut nam facilis et officia qui', completed: true }
-]
-
-const root = await protobuf.load('./tests/data/todos.proto')
+const root = await protobuf.load('./benchmarks/isolated/data/todos.proto')
 const prtobufType = root.lookupType('todos.TodosMessage')
 
 const type = avro.Type.forSchema({
@@ -106,6 +102,6 @@ await b.suite(
 
   b.cycle(),
   b.complete(),
-  b.save({ file: 'serialize', version: '1.0.0' }),
-  b.save({ file: 'serialize', format: 'chart.html' })
+  b.save({ file: 'deserialize', version: '1.0.0' }),
+  b.save({ file: 'deserialize', format: 'table.html' })
 )

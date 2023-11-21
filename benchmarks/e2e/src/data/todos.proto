@@ -1,0 +1,14 @@
+// todos.proto
+package todos;
+syntax = "proto3";
+
+message TodoMessage {
+    int32 id = 3;
+    int32 userId = 2;
+    string title = 1;
+    bool completed = 4;
+}
+
+message TodosMessage {
+  repeated TodoMessage objects = 1;
+}
