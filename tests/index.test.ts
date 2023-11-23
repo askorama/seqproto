@@ -1,6 +1,6 @@
 import t from 'node:test'
 import assert from 'node:assert'
-import { createSer, createDes } from '../src/index.js'
+import { createSer, createDes, Ser, Des } from '../src/index.js'
 
 await t.test('boolean', async t => {
   const bools = [
@@ -259,6 +259,119 @@ await t.test('iterable', async t => {
     const m = new Set(des.deserializeIterable(() => des.deserializeUInt32()))
     assert.deepStrictEqual(m, expected)
   })
+})
+
+await t.test('setBuffer with options', async t => {
+  await t.test('uint32', async () => {
+    const ser = createSer()
+    ser.serializeUInt32(1)
+    ser.serializeUInt32(2)
+    ser.serializeUInt32(3)
+    ser.serializeUInt32(4)
+    const buff = ser.getBuffer()
+    
+    const des = createDes(new ArrayBuffer(0))
+    {
+      des.setBuffer(buff, 0, 4)
+      assert.equal(des.deserializeUInt32(), 1)
+    }
+    {
+      des.setBuffer(buff, 4, 4)
+
+      assert.equal(des.deserializeUInt32(), 2)
+    }
+    {
+      des.setBuffer(buff, 8, 4)
+      assert.equal(des.deserializeUInt32(), 3)
+    }
+    {
+      des.setBuffer(buff, 12, 4)
+      assert.equal(des.deserializeUInt32(), 4)
+    }
+    {
+      des.setBuffer(buff, 4, 12)
+      assert.equal(des.deserializeUInt32(), 2)
+      assert.equal(des.deserializeUInt32(), 3)
+      assert.equal(des.deserializeUInt32(), 4)
+    }
+  })
+
+  await t.test('uint32 & string', async () => {
+    const ser = createSer()
+    ser.serializeUInt32(1)
+    ser.serializeString("v1")
+    const buff = ser.getBuffer()
+    
+    const des = createDes(new ArrayBuffer(0))
+    {
+      des.setBuffer(buff, 0, 12)
+      assert.equal(des.deserializeUInt32(), 1)
+      assert.equal(des.deserializeString(), "v1")
+    }
+    {
+      des.setBuffer(buff, 4, 8)
+      assert.equal(des.deserializeString(), "v1")
+    }
+  })
+})
+
+function serializeItem(ser: Ser, t: { foo: string, bar: number}) {
+  ser.serializeString(t.foo)
+  ser.serializeUInt32(t.bar)
+}
+
+function deserializeItem(des: Des): { foo: string, bar: number} {
+  const foo = des.deserializeString()
+  const bar = des.deserializeUInt32()
+  return {
+    foo,
+    bar,
+  }
+}
+
+await t.test('serialize + getArrayelements + serialize unsafe + deserialize with deserialize unsafe', async () => {
+  const arr = [
+    { foo: 'v1', bar: 42 },
+    { foo: 'v2', bar: 2 },
+    { foo: 'v3', bar: 99 }
+  ]
+  const elementIndexes = [0, 2]
+
+  let docsStorageBuffer: ArrayBuffer
+  {
+    const ser = createSer()
+    ser.serializeIndexableArray(arr, serializeItem)
+    docsStorageBuffer = ser.getBuffer()
+  }
+
+  let foo: ArrayBuffer
+  {
+    const ser = createSer()
+
+    const des = createDes(docsStorageBuffer)
+    const elements = des.getArrayElements(elementIndexes, function (_des, offset, length) {
+      return new Uint32Array(docsStorageBuffer, offset, length)
+    })
+
+    ser.serializeArray(elements, (ser, uint32Array) => {
+      ser.unsafeSerializeUint32Array(uint32Array)
+    })
+    foo = ser.getBuffer()
+  }
+
+  let found: { foo: string, bar: number }[]
+  {
+    const des = createDes(foo)
+
+    const itemDes = createDes(new ArrayBuffer(0))
+    found = des.deserializeArray((des) => {
+      const buff = des.unsafeDeserializeUint32Array()
+      itemDes.setBuffer(buff.buffer, buff.byteOffset, buff.byteLength)
+      return deserializeItem(itemDes)
+    })
+  }
+
+  assert.deepStrictEqual(found, elementIndexes.map(i => arr[i]))
 })
 
 await t.test('with option', async t => {
