@@ -1,5 +1,5 @@
 
-type StrictArrayBuffer = ArrayBuffer & { buffer?: undefined };
+type StrictArrayBuffer = ArrayBuffer & { buffer?: undefined }
 
 export interface Ser {
   index: number
@@ -92,7 +92,7 @@ export function createDes (buffer: StrictArrayBuffer): Des {
     deserializeArray,
     deserializeIterable,
     getArrayElements,
-    unsafeDeserializeUint32Array,
+    unsafeDeserializeUint32Array
   }
 }
 
@@ -172,20 +172,20 @@ function deserializeIterable<T> (this: Des, deserialize: (des: Des) => T): Itera
   }
 }
 
-function unsafeSerializeUint32Array(this: Ser, arr: Uint32Array) {
+function unsafeSerializeUint32Array (this: Ser, arr: Uint32Array): void {
   const length = Math.ceil(arr.byteLength / 4)
   this.uint32Array[this.index++] = length
   this.uint32Array.set(arr, this.index)
   this.index += length
 }
-function unsafeDeserializeUint32Array(this: Des): Uint32Array {
+function unsafeDeserializeUint32Array (this: Des): Uint32Array {
   const byteLength = this.uint32Array[this.index++]
   const d = new Uint32Array(this.buffer, this.index * 4, byteLength)
   this.index += byteLength
   return d
 }
 
-function serializeIndexableArray<T>(this: Ser, arr: T[], serialize: (ser: Ser, t: T) => void): void {
+function serializeIndexableArray<T> (this: Ser, arr: T[], serialize: (ser: Ser, t: T) => void): void {
   const l = arr.length
   this.uint32Array[this.index++] = l
   let indexOffsets = this.index
@@ -200,7 +200,7 @@ function serializeIndexableArray<T>(this: Ser, arr: T[], serialize: (ser: Ser, t
     this.uint32Array[indexOffsets++] = offsetEnd - offsetStart
   }
 }
-function getArrayElements<T>(this: Des, indexes: number[], deserialize: (des: Des, start: number, end: number) => T): T[] {
+function getArrayElements<T> (this: Des, indexes: number[], deserialize: (des: Des, start: number, end: number) => T): T[] {
   const currentIndex = this.index + 1
   const l = indexes.length
   const arr = new Array(l)

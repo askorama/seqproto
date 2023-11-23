@@ -269,63 +269,53 @@ await t.test('setBuffer with options', async t => {
     ser.serializeUInt32(3)
     ser.serializeUInt32(4)
     const buff = ser.getBuffer()
-    
-    const des = createDes(new ArrayBuffer(0))
-    {
-      des.setBuffer(buff, 0, 4)
-      assert.equal(des.deserializeUInt32(), 1)
-    }
-    {
-      des.setBuffer(buff, 4, 4)
 
-      assert.equal(des.deserializeUInt32(), 2)
-    }
-    {
-      des.setBuffer(buff, 8, 4)
-      assert.equal(des.deserializeUInt32(), 3)
-    }
-    {
-      des.setBuffer(buff, 12, 4)
-      assert.equal(des.deserializeUInt32(), 4)
-    }
-    {
-      des.setBuffer(buff, 4, 12)
-      assert.equal(des.deserializeUInt32(), 2)
-      assert.equal(des.deserializeUInt32(), 3)
-      assert.equal(des.deserializeUInt32(), 4)
-    }
+    const des = createDes(new ArrayBuffer(0))
+    des.setBuffer(buff, 0, 4)
+    assert.equal(des.deserializeUInt32(), 1)
+
+    des.setBuffer(buff, 4, 4)
+    assert.equal(des.deserializeUInt32(), 2)
+
+    des.setBuffer(buff, 8, 4)
+    assert.equal(des.deserializeUInt32(), 3)
+
+    des.setBuffer(buff, 12, 4)
+    assert.equal(des.deserializeUInt32(), 4)
+
+    des.setBuffer(buff, 4, 12)
+    assert.equal(des.deserializeUInt32(), 2)
+    assert.equal(des.deserializeUInt32(), 3)
+    assert.equal(des.deserializeUInt32(), 4)
   })
 
   await t.test('uint32 & string', async () => {
     const ser = createSer()
     ser.serializeUInt32(1)
-    ser.serializeString("v1")
+    ser.serializeString('v1')
     const buff = ser.getBuffer()
-    
+
     const des = createDes(new ArrayBuffer(0))
-    {
-      des.setBuffer(buff, 0, 12)
-      assert.equal(des.deserializeUInt32(), 1)
-      assert.equal(des.deserializeString(), "v1")
-    }
-    {
-      des.setBuffer(buff, 4, 8)
-      assert.equal(des.deserializeString(), "v1")
-    }
+    des.setBuffer(buff, 0, 12)
+    assert.equal(des.deserializeUInt32(), 1)
+    assert.equal(des.deserializeString(), 'v1')
+
+    des.setBuffer(buff, 4, 8)
+    assert.equal(des.deserializeString(), 'v1')
   })
 })
 
-function serializeItem(ser: Ser, t: { foo: string, bar: number}) {
+function serializeItem (ser: Ser, t: { foo: string, bar: number }): void {
   ser.serializeString(t.foo)
   ser.serializeUInt32(t.bar)
 }
 
-function deserializeItem(des: Des): { foo: string, bar: number} {
+function deserializeItem (des: Des): { foo: string, bar: number } {
   const foo = des.deserializeString()
   const bar = des.deserializeUInt32()
   return {
     foo,
-    bar,
+    bar
   }
 }
 
@@ -359,7 +349,7 @@ await t.test('serialize + getArrayelements + serialize unsafe + deserialize with
     foo = ser.getBuffer()
   }
 
-  let found: { foo: string, bar: number }[]
+  let found: Array<{ foo: string, bar: number }>
   {
     const des = createDes(foo)
 
