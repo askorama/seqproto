@@ -1,29 +1,35 @@
 
+type StrictArrayBuffer = ArrayBuffer & { buffer?: undefined }
+
 export interface Ser {
   index: number
   buffer: ArrayBuffer
   uint32Array: Uint32Array
   float32Array: Float32Array
-  getBuffer: () => ArrayBuffer
+  getBuffer: () => StrictArrayBuffer
   serializeBoolean: (b: boolean) => void
   serializeUInt32: (n: number) => void
   serializeFloat32: (n: number) => void
   serializeString: (str: string) => void
   serializeArray: <T>(arr: T[], serialize: (ser: Ser, t: T) => void) => void
   serializeIterable: <T>(iterable: Iterable<T>, serialize: (ser: Ser, t: T) => void) => void
+  serializeIndexableArray: <T>(arr: T[], serialize: (ser: Ser, t: T) => void) => void
+  unsafeSerializeUint32Array: (buffer: Uint32Array) => void
 }
 export interface Des {
   index: number
-  buffer: ArrayBuffer
+  buffer: StrictArrayBuffer
   uint32Array: Uint32Array
   float32Array: Float32Array
-  setBuffer: (buffer: ArrayBuffer) => void
+  setBuffer: (buffer: StrictArrayBuffer, byteOffset?: number, byteLength?: number) => void
   deserializeBoolean: () => boolean
   deserializeUInt32: () => number
   deserializeFloat32: () => number
   deserializeString: () => string
   deserializeArray: <T>(deserialize: (des: Des) => T) => T[]
   deserializeIterable: <T>(deserialize: (des: Des) => T) => Iterable<T>
+  unsafeDeserializeUint32Array: () => Uint32Array
+  getArrayElements: <T>(indexes: number[], deserialize: (des: Des, start: number, end: number) => T) => T[]
 }
 
 interface CreateSerOption {
@@ -47,11 +53,13 @@ export function createSer ({ bufferSize }: CreateSerOption = {}): Ser {
     serializeString,
     serializeArray,
     serializeIterable,
+    serializeIndexableArray,
+    unsafeSerializeUint32Array,
     getBuffer: function () { return this.buffer.slice(0, this.index * 4) }
   }
 }
 
-export function createDes (buffer: ArrayBuffer): Des {
+export function createDes (buffer: StrictArrayBuffer): Des {
   const n32 = Math.floor(buffer.byteLength / 4)
 
   return {
@@ -59,7 +67,18 @@ export function createDes (buffer: ArrayBuffer): Des {
     buffer,
     uint32Array: new Uint32Array(buffer, 0, n32),
     float32Array: new Float32Array(buffer, 0, n32),
-    setBuffer: function (buffer: ArrayBuffer) {
+    setBuffer: function (buffer: StrictArrayBuffer, byteOffset?: number, byteLength?: number) {
+      if (typeof byteOffset === 'number' && typeof byteLength === 'number') {
+        this.index = Math.floor(byteOffset / 4)
+        const n32 = this.index + Math.ceil(byteLength / 4)
+
+        this.buffer = buffer
+        this.uint32Array = new Uint32Array(buffer, 0, n32)
+        this.float32Array = new Float32Array(buffer, 0, n32)
+
+        return
+      }
+
       const n32 = Math.floor(buffer.byteLength / 4)
       this.buffer = buffer
       this.index = 0
@@ -71,7 +90,9 @@ export function createDes (buffer: ArrayBuffer): Des {
     deserializeFloat32,
     deserializeString,
     deserializeArray,
-    deserializeIterable
+    deserializeIterable,
+    getArrayElements,
+    unsafeDeserializeUint32Array
   }
 }
 
@@ -136,7 +157,6 @@ function serializeIterable<T> (this: Ser, iterable: Iterable<T>, serialize: (ser
   }
   this.uint32Array[currentIndex] = n
 }
-
 function deserializeIterable<T> (this: Des, deserialize: (des: Des) => T): Iterable<T> {
   const len = this.deserializeUInt32()
   const aGeneratorObject = (function * (des) {
@@ -150,4 +170,45 @@ function deserializeIterable<T> (this: Des, deserialize: (des: Des) => T): Itera
       return aGeneratorObject
     }
   }
+}
+
+function unsafeSerializeUint32Array (this: Ser, arr: Uint32Array): void {
+  const length = Math.ceil(arr.byteLength / 4)
+  this.uint32Array[this.index++] = length
+  this.uint32Array.set(arr, this.index)
+  this.index += length
+}
+function unsafeDeserializeUint32Array (this: Des): Uint32Array {
+  const byteLength = this.uint32Array[this.index++]
+  const d = new Uint32Array(this.buffer, this.index * 4, byteLength)
+  this.index += byteLength
+  return d
+}
+
+function serializeIndexableArray<T> (this: Ser, arr: T[], serialize: (ser: Ser, t: T) => void): void {
+  const l = arr.length
+  this.uint32Array[this.index++] = l
+  let indexOffsets = this.index
+  // Skip the length of the array twice
+  // to store the offset + length of the array element
+  this.index += l * 2
+  for (let i = 0; i < l; i++) {
+    const offsetStart = this.index
+    serialize(this, arr[i])
+    const offsetEnd = this.index
+    this.uint32Array[indexOffsets++] = offsetStart
+    this.uint32Array[indexOffsets++] = offsetEnd - offsetStart
+  }
+}
+function getArrayElements<T> (this: Des, indexes: number[], deserialize: (des: Des, start: number, end: number) => T): T[] {
+  const currentIndex = this.index + 1
+  const l = indexes.length
+  const arr = new Array(l)
+  for (let i = 0; i < l; i++) {
+    const indexOffset = currentIndex + indexes[i] * 2
+    const start = this.uint32Array[indexOffset]
+    const end = this.uint32Array[indexOffset + 1]
+    arr[i] = deserialize(this, start * 4, end)
+  }
+  return arr
 }
