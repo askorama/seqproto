@@ -66,7 +66,7 @@ server.get('/todos', {
   }
 }, async (request) => {
   if (request.headers.accept === 'application/seqproto') { 
-    ser.index = 0
+    ser.reset()
     ser.serializeArray(todos, (ser, todo) => {
       ser.serializeUInt32(todo.id)
       ser.serializeUInt32(todo.userId)

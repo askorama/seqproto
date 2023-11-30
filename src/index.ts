@@ -6,6 +6,7 @@ export interface Ser {
   buffer: ArrayBuffer
   uint32Array: Uint32Array
   float32Array: Float32Array
+  reset: () => void
   getBuffer: () => StrictArrayBuffer
   serializeBoolean: (b: boolean) => void
   serializeUInt32: (n: number) => void
@@ -47,6 +48,7 @@ export function createSer ({ bufferSize }: CreateSerOption = {}): Ser {
     buffer,
     uint32Array: new Uint32Array(buffer),
     float32Array: new Float32Array(buffer),
+    reset: function () { this.index = 0 },
     serializeBoolean,
     serializeUInt32,
     serializeFloat32,

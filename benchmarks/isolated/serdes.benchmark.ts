@@ -44,7 +44,7 @@ await b.suite(
   'Serialize / Deserialize',
 
   b.add('seqproto', () => {
-    ser.index = 0
+    ser.reset()
     ser.serializeArray(todos, (ser, todo) => {
       ser.serializeUInt32(todo.id)
       ser.serializeUInt32(todo.userId)

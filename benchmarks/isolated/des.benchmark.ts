@@ -39,7 +39,7 @@ const type = avro.Type.forSchema({
   }
 })
 const ser = createSer()
-ser.index = 0
+ser.reset()
 ser.serializeArray(todos, (ser, todo) => {
   ser.serializeUInt32(todo.id)
   ser.serializeUInt32(todo.userId)

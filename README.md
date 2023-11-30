@@ -153,6 +153,7 @@ This library exports the following functions:
 
 - `createSer()`/`createSer({ bufferSize: number })`: creates a new serializer.
 - `createDes(buffer)`: creates a new deserializer.
+- `ser.reset()`: reset the serializer.
 - `ser.serializeBoolean(b)`: serializes a boolean value.
 - `des.deserializeBoolean()`: deserializes a boolean value.
 - `ser.serializeUInt32(uint32)`: serializes a 32-bit unsigned integer.

@@ -215,7 +215,7 @@ await t.test('array', async t => {
 })
 
 await t.test('iterable', async t => {
-  await t.test('map<number, number>', async t => {
+  await t.test('map<number, number>', async () => {
     const expected: Map<number, number> = new Map([[0, 1], [2, 3], [4, 5]])
 
     const ser = createSer()
@@ -229,7 +229,7 @@ await t.test('iterable', async t => {
     assert.deepStrictEqual(m, expected)
   })
 
-  await t.test('map<string, number>', async t => {
+  await t.test('map<string, number>', async () => {
     const expected: Map<string, number> = new Map([
       ['foo', 1],
       ['bar', 3],
@@ -247,7 +247,7 @@ await t.test('iterable', async t => {
     assert.deepStrictEqual(m, expected)
   })
 
-  await t.test('set<number>', async t => {
+  await t.test('set<number>', async () => {
     const expected: Set<number> = new Set([1, 3, 5])
 
     const ser = createSer()
@@ -303,6 +303,24 @@ await t.test('setBuffer with options', async t => {
     des.setBuffer(buff, 4, 8)
     assert.equal(des.deserializeString(), 'v1')
   })
+})
+
+await t.test('reset', async () => {
+  const ser = createSer()
+  ser.serializeUInt32(42)
+
+  const des = createDes(ser.getBuffer())
+  assert.deepStrictEqual(des.deserializeUInt32(), 42)
+
+  ser.serializeUInt32(33)
+  des.setBuffer(ser.getBuffer())
+  assert.deepStrictEqual(des.deserializeUInt32(), 42)
+  assert.deepStrictEqual(des.deserializeUInt32(), 33)
+
+  ser.reset()
+  ser.serializeUInt32(11)
+  des.setBuffer(ser.getBuffer())
+  assert.deepStrictEqual(des.deserializeUInt32(), 11)
 })
 
 function serializeItem (ser: Ser, t: { foo: string, bar: number }): void {
@@ -365,7 +383,7 @@ await t.test('serialize + getArrayelements + serialize unsafe + deserialize with
 })
 
 await t.test('with option', async t => {
-  await t.test('bufferSize', async t => {
+  await t.test('bufferSize', async () => {
     {
       const ser = createSer({ bufferSize: 4 })
       assert.equal(ser.buffer.byteLength, 4)
