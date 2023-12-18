@@ -1,6 +1,11 @@
 
 type StrictArrayBuffer = ArrayBuffer & { buffer?: undefined }
 
+const TYPE_FLOAT = 0
+const TYPE_UINT32 = 1
+const TYPE_INT32 = 2
+const POW_2_32 = 2 ** 32
+
 export interface Ser {
   index: number
   buffer: ArrayBuffer
@@ -11,6 +16,7 @@ export interface Ser {
   serializeBoolean: (b: boolean) => void
   serializeUInt32: (n: number) => void
   serializeFloat32: (n: number) => void
+  serializeNumber: (n: number) => void
   serializeString: (str: string) => void
   serializeArray: <T>(arr: T[], serialize: (ser: Ser, t: T) => void) => void
   serializeIterable: <T>(iterable: Iterable<T>, serialize: (ser: Ser, t: T) => void) => void
@@ -26,6 +32,7 @@ export interface Des {
   deserializeBoolean: () => boolean
   deserializeUInt32: () => number
   deserializeFloat32: () => number
+  deserializeNumber: () => number
   deserializeString: () => string
   deserializeArray: <T>(deserialize: (des: Des) => T) => T[]
   deserializeIterable: <T>(deserialize: (des: Des) => T) => Iterable<T>
@@ -52,6 +59,7 @@ export function createSer ({ bufferSize }: CreateSerOption = {}): Ser {
     serializeBoolean,
     serializeUInt32,
     serializeFloat32,
+    serializeNumber,
     serializeString,
     serializeArray,
     serializeIterable,
@@ -90,6 +98,7 @@ export function createDes (buffer: StrictArrayBuffer): Des {
     deserializeBoolean,
     deserializeUInt32,
     deserializeFloat32,
+    deserializeNumber,
     deserializeString,
     deserializeArray,
     deserializeIterable,
@@ -116,6 +125,33 @@ function serializeFloat32 (this: Ser, n: number): void {
 }
 function deserializeFloat32 (this: Des): number {
   return this.float32Array[this.index++]
+}
+function serializeNumber (this: Ser, n: number): void {
+  // If it's not an integer
+  if (n % 1 !== 0) {
+    this.uint32Array[this.index++] = TYPE_FLOAT
+    this.serializeFloat32(n)
+  } else {
+    if (n >= 0) {
+      this.uint32Array[this.index++] = TYPE_UINT32
+      this.serializeUInt32(n)
+    } else {
+      this.uint32Array[this.index++] = TYPE_INT32
+      this.uint32Array[this.index++] = POW_2_32 + n
+    }
+  }
+}
+function deserializeNumber (this: Des): number {
+  const type = this.uint32Array[this.index++]
+  if (type === TYPE_FLOAT) {
+    return this.deserializeFloat32()
+  } else if (type === TYPE_UINT32) {
+    return this.deserializeUInt32()
+  } else if (type === TYPE_INT32) {
+    return this.uint32Array[this.index++] - POW_2_32
+  } else {
+    throw new Error('Unknown type')
+  }
 }
 
 const textEncoder = new TextEncoder()

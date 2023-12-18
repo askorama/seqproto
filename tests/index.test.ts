@@ -42,7 +42,7 @@ await t.test('boolean', async t => {
 
 await t.test('uint32', async t => {
   const numbers = [
-    0, 1, 10000
+    0, 1, 5, 123, 42, 10000
   ]
 
   for (const expected of numbers) {
@@ -59,22 +59,55 @@ await t.test('uint32', async t => {
 
   await t.test('serialize multiple numbers', () => {
     const ser = createSer()
-    ser.serializeUInt32(1)
-    ser.serializeUInt32(5)
-    ser.serializeUInt32(123)
-    ser.serializeUInt32(42)
+    for (const n of numbers) {
+      ser.serializeUInt32(n)
+    }
 
     const des = createDes(ser.getBuffer())
 
-    const n1 = des.deserializeUInt32()
-    const n2 = des.deserializeUInt32()
-    const n3 = des.deserializeUInt32()
-    const n4 = des.deserializeUInt32()
+    for (let i = 0; i < numbers.length; i++) {
+      assert.equal(des.deserializeUInt32(), numbers[i])
+    }
+  })
+})
 
-    assert.equal(n1, 1)
-    assert.equal(n2, 5)
-    assert.equal(n3, 123)
-    assert.equal(n4, 42)
+await t.test('number', async t => {
+  const numbers = [
+    0, 0.0, -0, -0.0, 42, -42, 42.42, -42.42
+  ]
+
+  for (const expected of numbers) {
+    await t.test(`serialize ${expected}`, () => {
+      const ser = createSer()
+      ser.serializeNumber(expected)
+
+      const des = createDes(ser.getBuffer())
+
+      const actual = des.deserializeNumber()
+
+      if (isFloat(expected)) {
+        assertFloat32Equals(actual, expected)
+      } else {
+        assert.equal(actual, expected)
+      }
+    })
+  }
+
+  await t.test('serialize multiple numbers', () => {
+    const ser = createSer()
+    for (const n of numbers) {
+      ser.serializeNumber(n)
+    }
+
+    const des = createDes(ser.getBuffer())
+
+    for (let i = 0; i < numbers.length; i++) {
+      if (isFloat(numbers[i])) {
+        assertFloat32Equals(des.deserializeNumber(), numbers[i])
+      } else {
+        assert.equal(des.deserializeNumber(), numbers[i])
+      }
+    }
   })
 })
 
@@ -91,7 +124,7 @@ await t.test('float32', async t => {
       const des = createDes(ser.getBuffer())
 
       const actual = des.deserializeFloat32()
-      assert.ok(Math.abs(actual - expected) < 0.0001)
+      assertFloat32Equals(actual, expected)
     })
   }
 
@@ -109,10 +142,10 @@ await t.test('float32', async t => {
     const n3 = des.deserializeFloat32()
     const n4 = des.deserializeFloat32()
 
-    assert.ok(Math.abs(n1 - -3) < 0.0001)
-    assert.ok(Math.abs(n2 - 55.5) < 0.0001)
-    assert.ok(Math.abs(n3 - 42.42) < 0.0001)
-    assert.ok(Math.abs(n4 - 33.3) < 0.0001)
+    assertFloat32Equals(n1, -3)
+    assertFloat32Equals(n2, 55.5)
+    assertFloat32Equals(n3, 42.42)
+    assertFloat32Equals(n4, 33.3)
   })
 })
 
@@ -465,4 +498,8 @@ function permutator (inputArr: any): any[][] {
 
 function isFloat (n: number): boolean {
   return Number(n) === n && n % 1 !== 0
+}
+
+function assertFloat32Equals (a: number, b: number): void {
+  assert.ok(Math.abs(a - b) < 0.0001)
 }

@@ -158,6 +158,8 @@ This library exports the following functions:
 - `des.deserializeBoolean()`: deserializes a boolean value.
 - `ser.serializeUInt32(uint32)`: serializes a 32-bit unsigned integer.
 - `des.deserializeUInt32(uint32)`: deserializes a 32-bit unsigned integer.
+- `ser.serializeNumber(n)`: serializes a 32-bit unsigned integer or signed integer or float.
+- `des.deserializeNumber(n)`: deserializes a 32-bit unsigned integer or signed integer or float.
 - `ser.serializeString(string)`: serializes a string.
 - `des.deserializeString()`: deserializes a string.
 - `ser.serializeArray(array, (ser, item) => { ... })`: serializes an array.
