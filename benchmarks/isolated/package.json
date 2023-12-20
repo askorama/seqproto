@@ -1,18 +1,12 @@
 {
-  "name": "seqproto-benchmarks-e2e",
+  "name": "seqproto-benchmarks-isolated",
   "version": "0.0.1",
   "type": "module",
   "description": "",
-  "scripts": {
-    "start": "node --import tsx src/index.ts",
-    "autocannon:json": "npx autocannon 'http://localhost:3000/todos'",
-    "autocannon:seqproto": "npx autocannon -H 'accept=application/seqproto' 'http://localhost:3000/todos'",
-    "autocannon:avro": "autocannon -H 'accept=application/avro' 'http://localhost:3000/todos'"
-  },
+  "scripts": {},
   "author": {
-    "name": "Tommaso Allevi",
-    "email": "tomallevi@gmail.com",
-    "url": "https://github.com/allevo",
+    "name": "Matteo Pietro Dazzi",
+    "url": "https://github.com/ilteoood",
     "author": true
   },
   "engines": {
