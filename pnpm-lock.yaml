@@ -27,7 +27,7 @@ importers:
         specifier: ^4.24.3
         version: 4.25.1
       seqproto:
-        specifier: link:../..
+        specifier: workspace:^
         version: link:../..
     devDependencies:
       '@msgpack/msgpack':
@@ -91,7 +91,7 @@ importers:
         specifier: ^4.24.3
         version: 4.25.1
       seqproto:
-        specifier: link:../..
+        specifier: workspace:^
         version: link:../..
     devDependencies:
       '@msgpack/msgpack':
