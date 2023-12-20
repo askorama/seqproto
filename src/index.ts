@@ -1,5 +1,5 @@
 
-type StrictArrayBuffer = ArrayBuffer & { buffer?: undefined }
+export type StrictArrayBuffer = ArrayBuffer & { buffer?: undefined }
 
 const TYPE_FLOAT = 0
 const TYPE_UINT32 = 1
@@ -45,7 +45,7 @@ interface CreateSerOption {
 }
 export function createSer ({ bufferSize }: CreateSerOption = {}): Ser {
   const size = bufferSize ?? 2 ** 24
-  if (size >= 2 ** 32) {
+  if (size >= POW_2_32) {
     throw new Error('bufferSize option must be strictly less than 2 ** 32')
   }
 
@@ -131,14 +131,12 @@ function serializeNumber (this: Ser, n: number): void {
   if (n % 1 !== 0) {
     this.uint32Array[this.index++] = TYPE_FLOAT
     this.serializeFloat32(n)
+  } else if (n >= 0) {
+    this.uint32Array[this.index++] = TYPE_UINT32
+    this.serializeUInt32(n)
   } else {
-    if (n >= 0) {
-      this.uint32Array[this.index++] = TYPE_UINT32
-      this.serializeUInt32(n)
-    } else {
-      this.uint32Array[this.index++] = TYPE_INT32
-      this.uint32Array[this.index++] = POW_2_32 + n
-    }
+    this.uint32Array[this.index++] = TYPE_INT32
+    this.uint32Array[this.index++] = POW_2_32 + n
   }
 }
 function deserializeNumber (this: Des): number {
