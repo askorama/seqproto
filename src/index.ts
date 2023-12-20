@@ -1,5 +1,5 @@
 
-export type StrictArrayBuffer = ArrayBuffer & { buffer: undefined }
+export type StrictArrayBuffer = ArrayBuffer & { buffer?: undefined }
 
 const TYPE_FLOAT = 0
 const TYPE_UINT32 = 1

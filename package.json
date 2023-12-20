@@ -42,21 +42,9 @@
     "node": ">= 20.0.0"
   },
   "devDependencies": {
-    "@msgpack/msgpack": "3.0.0-beta2",
-    "@types/node": "=20.8.0",
-    "avro-js": "^1.11.3",
-    "avsc": "^5.7.7",
-    "benny": "^3.7.1",
-    "cbor": "^9.0.1",
-    "cbor-x": "^1.5.4",
-    "fast-json-stringify": "^5.9.1",
-    "lodash": "^4.17.21",
-    "msgpackr": "^1.9.9",
-    "protobufjs": "^7.2.5",
     "ts-standard": "^12.0.2",
     "tsx": "^3.14.0",
-    "typescript": "^5.2.2",
-    "undici-types": "^5.27.2"
+    "typescript": "^5.2.2"
   },
   "ts-standard": {
     "ignore": [
