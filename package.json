@@ -1,6 +1,6 @@
 {
   "name": "seqproto",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "type": "module",
   "description": "More than fast serialization / deserialization utility for your structured data",
   "main": "./dist/cjs/index.js",
