@@ -1,6 +1,8 @@
 
 export type StrictArrayBuffer = ArrayBuffer & { buffer?: undefined }
 
+const UINT32_BYTES = Uint32Array.BYTES_PER_ELEMENT
+
 const TYPE_FLOAT = 0
 const TYPE_UINT32 = 1
 const TYPE_INT32 = 2
@@ -9,8 +11,7 @@ const POW_2_32 = 2 ** 32
 export interface Ser {
   index: number
   buffer: ArrayBuffer
-  uint32Array: Uint32Array
-  float32Array: Float32Array
+  wBuffer: DataView
   reset: () => void
   getBuffer: () => StrictArrayBuffer
   serializeBoolean: (b: boolean) => void
@@ -23,11 +24,11 @@ export interface Ser {
   serializeIndexableArray: <T>(arr: T[], serialize: (ser: Ser, t: T) => void) => void
   unsafeSerializeUint32Array: (buffer: Uint32Array) => void
 }
+
 export interface Des {
   index: number
   buffer: StrictArrayBuffer
-  uint32Array: Uint32Array
-  float32Array: Float32Array
+  wBuffer: DataView
   setBuffer: (buffer: StrictArrayBuffer, byteOffset?: number, byteLength?: number) => void
   deserializeBoolean: () => boolean
   deserializeUInt32: () => number
@@ -43,6 +44,7 @@ export interface Des {
 interface CreateSerOption {
   bufferSize?: number
 }
+
 export function createSer ({ bufferSize }: CreateSerOption = {}): Ser {
   const size = bufferSize ?? 2 ** 24
   if (size >= POW_2_32) {
@@ -53,8 +55,7 @@ export function createSer ({ bufferSize }: CreateSerOption = {}): Ser {
   return {
     index: 0,
     buffer,
-    uint32Array: new Uint32Array(buffer),
-    float32Array: new Float32Array(buffer),
+    wBuffer: new DataView(buffer),
     reset: function () { this.index = 0 },
     serializeBoolean,
     serializeUInt32,
@@ -70,30 +71,22 @@ export function createSer ({ bufferSize }: CreateSerOption = {}): Ser {
 }
 
 export function createDes (buffer: StrictArrayBuffer): Des {
-  const n32 = Math.floor(buffer.byteLength / 4)
-
   return {
     index: 0,
     buffer,
-    uint32Array: new Uint32Array(buffer, 0, n32),
-    float32Array: new Float32Array(buffer, 0, n32),
+    wBuffer: new DataView(buffer),
     setBuffer: function (buffer: StrictArrayBuffer, byteOffset?: number, byteLength?: number) {
       if (typeof byteOffset === 'number' && typeof byteLength === 'number') {
-        this.index = Math.floor(byteOffset / 4)
-        const n32 = this.index + Math.ceil(byteLength / 4)
-
+        this.index = byteOffset
         this.buffer = buffer
-        this.uint32Array = new Uint32Array(buffer, 0, n32)
-        this.float32Array = new Float32Array(buffer, 0, n32)
+        this.wBuffer = new DataView(buffer)
 
         return
       }
 
-      const n32 = Math.floor(buffer.byteLength / 4)
       this.buffer = buffer
       this.index = 0
-      this.uint32Array = new Uint32Array(buffer, 0, n32)
-      this.float32Array = new Float32Array(buffer, 0, n32)
+      this.wBuffer = new DataView(buffer)
     },
     deserializeBoolean,
     deserializeUInt32,
@@ -108,45 +101,70 @@ export function createDes (buffer: StrictArrayBuffer): Des {
 }
 
 function serializeBoolean (this: Ser, b: boolean): void {
-  this.uint32Array[this.index++] = b ? 1 : 0
+  this.wBuffer.setUint8(this.index++, b ? 1:0)
 }
+
 function deserializeBoolean (this: Ser): boolean {
-  return this.uint32Array[this.index++] === 1
+  return this.wBuffer.getUint8(this.index++) === 1
 }
 
 function serializeUInt32 (this: Ser, n: number): void {
-  this.uint32Array[this.index++] = n
+  this.wBuffer.setUint32(this.index, n)
+  this.index += UINT32_BYTES
 }
+
 function deserializeUInt32 (this: Des): number {
-  return this.uint32Array[this.index++]
+  const rest = this.wBuffer.getUint32(this.index)
+  this.index += UINT32_BYTES
+
+  return rest
 }
+
 function serializeFloat32 (this: Ser, n: number): void {
-  this.float32Array[this.index++] = n
+  this.wBuffer.setFloat32(this.index, n)
+  this.index += UINT32_BYTES
 }
+
 function deserializeFloat32 (this: Des): number {
-  return this.float32Array[this.index++]
+  const rest = this.wBuffer.getFloat32(this.index)
+  this.index += UINT32_BYTES
+
+  return rest
 }
+
 function serializeNumber (this: Ser, n: number): void {
   // If it's not an integer
   if (n % 1 !== 0) {
-    this.uint32Array[this.index++] = TYPE_FLOAT
+    this.wBuffer.setUint32(this.index, TYPE_FLOAT)
+    this.index += UINT32_BYTES
+
     this.serializeFloat32(n)
   } else if (n >= 0) {
-    this.uint32Array[this.index++] = TYPE_UINT32
+    this.wBuffer.setUint32(this.index, TYPE_UINT32)
+    this.index += UINT32_BYTES
+
     this.serializeUInt32(n)
   } else {
-    this.uint32Array[this.index++] = TYPE_INT32
-    this.uint32Array[this.index++] = POW_2_32 + n
+    this.wBuffer.setUint32(this.index, TYPE_INT32)
+    this.index += UINT32_BYTES
+
+    this.wBuffer.setUint32(this.index, POW_2_32 + n)
+    this.index += UINT32_BYTES
   }
 }
 function deserializeNumber (this: Des): number {
-  const type = this.uint32Array[this.index++]
+  const type = this.wBuffer.getUint32(this.index)
+  this.index += UINT32_BYTES
+
   if (type === TYPE_FLOAT) {
     return this.deserializeFloat32()
   } else if (type === TYPE_UINT32) {
     return this.deserializeUInt32()
   } else if (type === TYPE_INT32) {
-    return this.uint32Array[this.index++] - POW_2_32
+    const ret = this.wBuffer.getUint32(this.index) - POW_2_32
+    this.index += UINT32_BYTES
+
+    return ret
   } else {
     throw new Error('Unknown type')
   }
@@ -154,16 +172,20 @@ function deserializeNumber (this: Des): number {
 
 const textEncoder = new TextEncoder()
 function serializeString (this: Ser, str: string): void {
-  const r = textEncoder.encodeInto(str, new Uint8Array(this.buffer, (this.index + 1) * 4))
-  this.uint32Array[this.index] = r.written
-  this.index += Math.ceil(r.written / 4) + 1
+  const r = textEncoder.encodeInto(str, new Uint8Array(this.buffer, this.index + UINT32_BYTES))
+
+  this.wBuffer.setUint32(this.index, r.written)
+  this.index += UINT32_BYTES + r.written
 }
 
 const textDecoder = new TextDecoder()
 function deserializeString (this: Des): string {
-  const len = this.uint32Array[this.index++]
-  const decoded = textDecoder.decode(new Uint8Array(this.buffer, this.index * 4, len))
-  this.index += Math.ceil(len / 4)
+  const len = this.wBuffer.getUint32(this.index)
+  this.index += UINT32_BYTES
+
+  const decoded = textDecoder.decode(new Uint8Array(this.buffer, this.index, len))
+  this.index += len
+
   return decoded
 }
 
@@ -185,14 +207,19 @@ function deserializeArray<T> (this: Des, deserialize: (ser: Des) => T): T[] {
 
 function serializeIterable<T> (this: Ser, iterable: Iterable<T>, serialize: (ser: Ser, t: T) => void): void {
   // Keep space for the length
-  const currentIndex = this.index++
+  const currentIndex = this.index
+
+  this.index += UINT32_BYTES
+
   let n = 0
   for (const t of iterable) {
     n++
     serialize(this, t)
   }
-  this.uint32Array[currentIndex] = n
+
+  this.wBuffer.setUint32(currentIndex, n)
 }
+
 function deserializeIterable<T> (this: Des, deserialize: (des: Des) => T): Iterable<T> {
   const len = this.deserializeUInt32()
   const aGeneratorObject = (function * (des) {
@@ -210,41 +237,68 @@ function deserializeIterable<T> (this: Des, deserialize: (des: Des) => T): Itera
 
 function unsafeSerializeUint32Array (this: Ser, arr: Uint32Array): void {
   const length = Math.ceil(arr.byteLength / 4)
-  this.uint32Array[this.index++] = length
-  this.uint32Array.set(arr, this.index)
-  this.index += length
+
+  this.wBuffer.setUint32(this.index, length)
+  this.index += UINT32_BYTES
+
+  for(let i = 0; i < arr.length; i ++) {
+    this.wBuffer.setUint32(this.index, arr[i])
+    this.index += UINT32_BYTES
+  }
 }
+
 function unsafeDeserializeUint32Array (this: Des): Uint32Array {
-  const byteLength = this.uint32Array[this.index++]
-  const d = new Uint32Array(this.buffer, this.index * 4, byteLength)
-  this.index += byteLength
+  const byteLength = this.wBuffer.getUint32(this.index)
+  this.index += UINT32_BYTES
+
+  const d = new Uint32Array(byteLength)
+
+  for(let i = 0; i < d.length; i ++) {
+    d[i] = this.wBuffer.getUint32(this.index)
+    this.index += UINT32_BYTES
+  }
+
   return d
 }
 
 function serializeIndexableArray<T> (this: Ser, arr: T[], serialize: (ser: Ser, t: T) => void): void {
   const l = arr.length
-  this.uint32Array[this.index++] = l
+
+  this.wBuffer.setUint32(this.index, l)
+  this.index += UINT32_BYTES
+
   let indexOffsets = this.index
-  // Skip the length of the array twice
-  // to store the offset + length of the array element
-  this.index += l * 2
+
+  this.index += (l * (UINT32_BYTES + UINT32_BYTES))
+
+  // Skip the size of the array multiplied by 8 (4 bytes for the start, 4bytes for the length)
+  
   for (let i = 0; i < l; i++) {
     const offsetStart = this.index
     serialize(this, arr[i])
     const offsetEnd = this.index
-    this.uint32Array[indexOffsets++] = offsetStart
-    this.uint32Array[indexOffsets++] = offsetEnd - offsetStart
+
+    this.wBuffer.setUint32(indexOffsets, offsetStart)
+    indexOffsets += UINT32_BYTES
+
+    this.wBuffer.setUint32(indexOffsets, offsetEnd - offsetStart)
+    indexOffsets += UINT32_BYTES
   }
 }
+
 function getArrayElements<T> (this: Des, indexes: number[], deserialize: (des: Des, start: number, end: number) => T): T[] {
-  const currentIndex = this.index + 1
+  const currentIndex = this.index + UINT32_BYTES
   const l = indexes.length
   const arr = new Array(l)
+
   for (let i = 0; i < l; i++) {
-    const indexOffset = currentIndex + indexes[i] * 2
-    const start = this.uint32Array[indexOffset]
-    const end = this.uint32Array[indexOffset + 1]
-    arr[i] = deserialize(this, start * 4, end)
+    const indexOffset = currentIndex + (indexes[i] * (UINT32_BYTES + UINT32_BYTES))
+
+    const start = this.wBuffer.getUint32(indexOffset)
+    const end = this.wBuffer.getUint32(indexOffset + UINT32_BYTES)
+
+    arr[i] = deserialize(this, start, end)
   }
+
   return arr
 }
