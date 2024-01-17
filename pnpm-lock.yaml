@@ -34,8 +34,8 @@ importers:
         specifier: 3.0.0-beta2
         version: 3.0.0-beta2
       '@types/node':
-        specifier: 20.10.5
-        version: 20.10.5
+        specifier: 20.11.4
+        version: 20.11.4
       autocannon:
         specifier: ^7.14.0
         version: 7.14.0
@@ -98,8 +98,8 @@ importers:
         specifier: 3.0.0-beta2
         version: 3.0.0-beta2
       '@types/node':
-        specifier: 20.10.5
-        version: 20.10.5
+        specifier: 20.11.4
+        version: 20.11.4
       autocannon:
         specifier: ^7.14.0
         version: 7.14.0
@@ -682,8 +682,8 @@ packages:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
     dev: true
 
-  /@types/node@20.10.5:
-    resolution: {integrity: sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==}
+  /@types/node@20.11.4:
+    resolution: {integrity: sha512-6I0fMH8Aoy2lOejL3s4LhyIYX34DPwY8bl5xlNjBvUEk8OHrcuzsFt+Ied4LvJihbtXPM+8zUqdydfIti86v9g==}
     dependencies:
       undici-types: 5.26.5
     dev: true
@@ -3570,7 +3570,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.10.5
+      '@types/node': 20.11.4
       long: 5.2.3
     dev: true
 
