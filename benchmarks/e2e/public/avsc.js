@@ -6907,8 +6907,8 @@
         // Special case, empty record. We handle this directly.
           body += '  return true;\n'
         } else {
-          for (i = 0, l = this.fields.length; i < l; i++) {
-            field = this.fields[i]
+          for (let i = 0, l = this.fields.length; i < l; i++) {
+            let field = this.fields[i]
             names.push('t' + i)
             values.push(field.type)
             if (field.defaultValue() !== undefined) {
